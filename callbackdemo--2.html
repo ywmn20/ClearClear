@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style type="text/css">
+		canvas{
+			border:1px solid red;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="naive" width="1000" height="800"></canvas>
+
+	<script type="text/javascript">
+		var naive=document.getElementById('naive');
+		var ctx=naive.getContext("2d");
+
+		var fang=new Fang();
+		var fno=0;
+		var state="right";//状态机
+		var callbacks={
+			"200":function(){
+				console.log('200 le')
+			}
+		}
+
+		setInterval(function(){
+			ctx.clearRect(0,0,1000,800);
+			fno++;
+			ctx.font="40px 宋体";
+			ctx.fillText(fno,10,40);
+			ctx.fillText(state,10,80);
+			fang.update()
+			fang.render()
+
+			if(callbacks.hasOwnProperty(fno)){
+                callbacks[fno]();
+                delete callbacks[fno];
+            }
+
+			if(state=="right"){
+				fang.goRight(200,function(){
+					state='down';
+				});
+				state="animating"
+			}else if(state=="down"){
+				fang.goDown(100,function(){
+					state='left';
+				});
+				state="animating"
+			}else if(state=="left"){
+				fang.goLeft(200,function(){
+					state='up';
+				});
+				state="animating"
+			}else if(state=="up"){
+				fang.goUp(100,function(){
+					state="stopped"
+				});
+				state="animating"
+			}else if(state=="stopped"){
+				fang.stop();
+			}
+			
+		},2)
+
+		function regCallback(frameLater,fn){
+			callbacks[fno+frameLater]=fn;
+		}
+
+		function Fang(){
+			this.x=100;
+			this.y=100;
+			this.dx=0;
+			this.dy=0;
+		}
+
+		Fang.prototype.update=function(){
+			this.x+=this.dx;
+			this.y+=this.dy;
+		}
+		Fang.prototype.render=function(){
+			ctx.fillRect(this.x,this.y,60,60);
+		}
+		Fang.prototype.stop=function(){
+			this.dx=0;
+			this.dy=0;
+		}
+		Fang.prototype.goRight=function(number,callback){
+			this.dx=2;
+			this.dy=0;
+
+			regCallback(number,callback);
+		}
+		Fang.prototype.goLeft=function(number,callback){
+			this.dx=-2;
+			this.dy=0;
+
+			regCallback(number,callback);
+		}
+		Fang.prototype.goDown=function(number,callback){
+			this.dx=0;
+			this.dy=2;
+
+			regCallback(number,callback);
+		}
+		Fang.prototype.goUp=function(number,callback){
+			this.dx=0;
+			this.dy=-2;
+
+			regCallback(number,callback);
+		}
+	</script>
+</body>
+</html>
