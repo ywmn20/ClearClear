@@ -1,2 +1,0 @@
-# ClearClear
-clear doll
